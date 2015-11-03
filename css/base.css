@@ -7,6 +7,10 @@ body {
   padding: 30px;
 }
 
+button {
+  font-size: 115%;
+}
+
 a {
   color: #4183c4;
   text-decoration: none;
