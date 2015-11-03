@@ -6,6 +6,8 @@ console.log("react-app.js()");
 var React = require('react');
 var ReactDOM = require('react-dom');
 
+var initMemory = performance.memory;
+
 var scrollToBottom = function scrollToBottom() {
     var docHeight = document.body.offsetHeight;
     docHeight = docHeight == undefined ? window.document.documentElement.scrollHeight : docHeight;
@@ -30,13 +32,14 @@ var ExampleApplication = React.createClass({
             pageSize: 50,
             rows: [],
             updateInterval: 750,
-            maxRows: 10000
+            maxRows: 1000
         };
     },
 
     componentDidMount: function componentDidMount() {
 
         console.log("ExampleApplication.componentDidMount()");
+        console.log("ExampleApplication.componentDidMount() - initial performance.memory: ", initMemory);
 
         //init app
         var rows = [{
@@ -78,6 +81,9 @@ var ExampleApplication = React.createClass({
                 scrollToBottom();
             } else {
                 console.log("ExampleApplication.interval() - DONE at rows: ", _app.state.maxRows);
+
+                console.log("ExampleApplication.interval() - initial performance.memory: ", initMemory);
+                console.log("ExampleApplication.interval() - performance.memory: ", performance.memory);
                 clearInterval(updateInterval);
             }
         }, this.state.updateInterval);
