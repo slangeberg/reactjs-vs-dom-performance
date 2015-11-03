@@ -5,19 +5,28 @@ console.log("react-app.js()");
 var React = require('react');
 var ReactDOM = require('react-dom');
 
-var initMemory = performance.memory;
+//ensure copy
+var initMemory = {
+    jsHeapSizeLimit: performance.memory.jsHeapSizeLimit,
+    totalJSHeapSize: performance.memory.totalJSHeapSize,
+    usedJSHeapSize: performance.memory.usedJSHeapSize
+};
+
+var executionTimes = [];
+
+var median = function(sequence) {
+    // note that direction doesn't matter
+    sequence.sort(function (a, b) {
+        return a - b;
+    });
+    return sequence[Math.ceil(sequence.length / 2)];
+}
 
 var scrollToBottom = function() {
     var docHeight = document.body.offsetHeight;
     docHeight = docHeight == undefined ? window.document.documentElement.scrollHeight : docHeight;
 
-    //var winheight = window.innerHeight;
-    //winheight = winheight == undefined ? document.documentElement.clientHeight : winheight;
-    //
-    //var scrollpoint = window.scrollY;
-    //scrollpoint = scrollpoint == undefined ? window.document.documentElement.scrollTop : scrollpoint;
-
-    console.log("scrollToBottom() - scroll to docHeight: ", docHeight);
+    //console.log("scrollToBottom() - scroll to docHeight: ", docHeight);
 
     window.scrollTo(0, docHeight);
 }
@@ -30,41 +39,31 @@ var ExampleApplication = React.createClass({
             pageSize: 50,
             rows: [],
             updateInterval: 750,
-            maxRows: 1000
+            maxRows: 5000
         };
     },
 
     componentDidMount: function() {
 
-        console.log("ExampleApplication.componentDidMount()");
+        console.log("ExampleApplication.componentDidMount() - will render with initial state: ", this.state);
         console.log("ExampleApplication.componentDidMount() - initial performance.memory: ", initMemory);
-
-        //init app
-        var rows = [
-            {
-                id: 1,
-                rowNum: 1,
-                artist: 'jebba',
-                album: 'bush'
-            }
-        ];
-
-        //var start = new Date().getTime();
-
-        this.state.rows = rows;
-        this.setState(this.state);
 
         var _app = this;
 
         var updateInterval = setInterval(function () {
 
             if (_app.state.rows.length < _app.state.maxRows) {
-                //User 'scrolled' to bottom
+
+                //Simulate that user 'scrolled' to bottom
+
+                var t0 = performance.now();
+
+                var rows = _app.state.rows;
 
                 // simulate updating model with server results, after a scroll
                 for (var i = 0; i < _app.state.pageSize; i++) {
                     var last = rows[rows.length - 1];
-                    var id = last.id + 1;
+                    var id = (last ? last.id : 0) + 1;
                     var row = {
                         id: id,
                         rowNum: id,
@@ -80,12 +79,23 @@ var ExampleApplication = React.createClass({
 
                 scrollToBottom();
 
+                var t1 = performance.now();
+                executionTimes.push(t1 - t0);
+
             } else {
+                clearInterval(updateInterval);
+
                 console.log("ExampleApplication.interval() - DONE at rows: ", _app.state.maxRows);
 
                 console.log("ExampleApplication.interval() - initial performance.memory: ", initMemory);
                 console.log("ExampleApplication.interval() - performance.memory: ", performance.memory);
-                clearInterval(updateInterval);
+
+                // SIDE EFFECT: Sorts array
+                var medianValue = median(executionTimes).toFixed(4);
+
+                console.log('Execution times: ', executionTimes);
+                console.log('Median time: ', medianValue, 'ms');
+
             }
 
         }, this.state.updateInterval);
