@@ -1,35 +1,153 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
+console.log("react-app.js()");
+
 var React = require('react');
 var ReactDOM = require('react-dom');
 
 var ExampleApplication = React.createClass({
-  displayName: 'ExampleApplication',
+    displayName: 'ExampleApplication',
 
-  render: function render() {
-    var elapsed = Math.round(this.props.elapsed / 100);
-    var seconds = elapsed / 10 + (elapsed % 10 ? '' : '.0');
-    var message = 'React has been successfully running for ' + seconds + ' seconds.';
+    getInitialState: function getInitialState() {
+        console.log("ExampleApplication.getInitialState()");
+        return { rows: [] };
+    },
 
-    return React.createElement(
-      'p',
-      null,
-      message
-    );
-  }
+    componentDidMount: function componentDidMount() {
+
+        console.log("ExampleApplication.componentDidMount()");
+
+        //init app
+        var rows = [{
+            id: 1,
+            rowNum: 1,
+            artist: 'jebba',
+            album: 'bush'
+        }];
+
+        //var start = new Date().getTime();
+
+        this.setState({ rows: rows });
+
+        var _app = this;
+
+        setInterval(function () {
+            // simulate updating model with server results, after a scroll
+            var last = rows[rows.length - 1];
+            var id = last.id + 1;
+            var row = {
+                id: id,
+                rowNum: id,
+                artist: 'Artist ' + id,
+                album: 'Album ' + id
+            };
+
+            rows.push(row);
+
+            console.log("ExampleApplication.componentDidMount() - interval - new row: ", row);
+
+            _app.setState({ rows: rows });
+        }, 1000);
+    },
+
+    render: function render() {
+        //var elapsed = Math.round(this.props.elapsed  / 100);
+        //var seconds = elapsed / 10 + (elapsed % 10 ? '' : '.0' );
+        //var message =
+        //  'React has been successfully running for ' + seconds + ' seconds.';
+
+        console.log("ExampleApplication.render() - state: ", this.state);
+
+        return React.createElement(InfiniteTable, { rows: this.state.rows });
+    }
 });
 
-var start = new Date().getTime();
+var TableRow = React.createClass({
+    displayName: 'TableRow',
 
-setInterval(function () {
-  ReactDOM.render(React.createElement(ExampleApplication, { elapsed: new Date().getTime() - start }), document.getElementById('container'));
-}, 50);
+    render: function render() {
+        return React.createElement(
+            'tr',
+            null,
+            React.createElement(
+                'td',
+                null,
+                this.props.data.rowNum
+            ),
+            React.createElement(
+                'td',
+                null,
+                ' '
+            ),
+            React.createElement(
+                'td',
+                null,
+                this.props.data.artist
+            ),
+            React.createElement(
+                'td',
+                null,
+                this.props.data.album
+            )
+        );
+    }
+});
 
-//ReactDOM.render(
-//    <h1>Hello, world!</h1>,
-//    document.getElementById('example')
-//);
+var InfiniteTable = React.createClass({
+    displayName: 'InfiniteTable',
+
+    render: function render() {
+
+        return React.createElement(
+            'table',
+            { className: 'table' },
+            React.createElement(
+                'caption',
+                null,
+                'React populated table'
+            ),
+            React.createElement(
+                'thead',
+                null,
+                React.createElement(
+                    'tr',
+                    null,
+                    React.createElement(
+                        'th',
+                        null,
+                        '#'
+                    ),
+                    React.createElement(
+                        'th',
+                        null,
+                        ' '
+                    ),
+                    React.createElement(
+                        'th',
+                        null,
+                        'Artist'
+                    ),
+                    React.createElement(
+                        'th',
+                        null,
+                        'Album'
+                    )
+                )
+            ),
+            React.createElement(
+                'tbody',
+                { id: 'item_table_body' },
+                this.props.rows.map(function (result) {
+                    console.log("InfiniteTable.render() - props.rows.map(", result, ")");
+                    return React.createElement(TableRow, { key: result.id, data: result });
+                })
+            )
+        );
+    }
+});
+
+ReactDOM.render(React.createElement(ExampleApplication, null), document.getElementById('container'));
 
 },{"react":159,"react-dom":30}],2:[function(require,module,exports){
 (function (process){

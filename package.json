@@ -4,7 +4,7 @@
   "description": "Compares React.js rendering performance vs. native DOM operations.",
   "main": "index.js",
   "scripts": {
-    "start": "watchify index.js -v -t babelify -o bundle.js"
+    "start": "watchify js/react-app.js -v -t babelify -o bundle.js"
   },
   "repository": {
     "type": "git",
