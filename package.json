@@ -1,0 +1,25 @@
+{
+  "name": "reactjs-vs-dom-performance",
+  "version": "1.0.0",
+  "description": "Compares React.js rendering performance vs. native DOM operations.",
+  "main": "index.js",
+  "scripts": {
+    "start": "watchify index.js -v -t babelify -o bundle.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/slangeberg/reactjs-vs-dom-performance.git"
+  },
+  "author": "slangeberg@gmail.com",
+  "license": "Apache 2.0",
+  "bugs": {
+    "url": "https://github.com/slangeberg/reactjs-vs-dom-performance/issues"
+  },
+  "homepage": "https://github.com/slangeberg/reactjs-vs-dom-performance#readme",
+  "dependencies": {
+    "babelify": "^6.4.0",
+    "react": "^0.14.2",
+    "react-dom": "^0.14.2",
+    "watchify": "^3.6.0"
+  }
+}
