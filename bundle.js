@@ -41,7 +41,7 @@ var ExampleApplication = React.createClass({
             pageSize: 50,
             rows: [],
             updateInterval: 750,
-            maxRows: 5000
+            maxRows: 10000
         };
     },
 
