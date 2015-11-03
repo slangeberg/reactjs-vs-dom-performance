@@ -5,11 +5,31 @@ console.log("react-app.js()");
 var React = require('react');
 var ReactDOM = require('react-dom');
 
+var scrollToBottom = function() {
+    var docHeight = document.body.offsetHeight;
+    docHeight = docHeight == undefined ? window.document.documentElement.scrollHeight : docHeight;
+
+    //var winheight = window.innerHeight;
+    //winheight = winheight == undefined ? document.documentElement.clientHeight : winheight;
+    //
+    //var scrollpoint = window.scrollY;
+    //scrollpoint = scrollpoint == undefined ? window.document.documentElement.scrollTop : scrollpoint;
+
+    console.log("scrollToBottom() - scroll to docHeight: ", docHeight);
+
+    window.scrollTo(0, docHeight);
+}
+
 var ExampleApplication = React.createClass({
 
     getInitialState: function() {
         console.log("ExampleApplication.getInitialState()");
-        return {rows: []};
+        return {
+            pageSize: 50,
+            rows: [],
+            updateInterval: 750,
+            maxRows: 10000
+        };
     },
 
     componentDidMount: function() {
@@ -28,37 +48,45 @@ var ExampleApplication = React.createClass({
 
         //var start = new Date().getTime();
 
-        this.setState({rows: rows});
+        this.state.rows = rows;
+        this.setState(this.state);
 
         var _app = this;
 
-        setInterval(function () {
-            // simulate updating model with server results, after a scroll
-            var last = rows[rows.length - 1];
-            var id = last.id + 1;
-            var row = {
-                id: id,
-                rowNum: id,
-                artist: 'Artist ' + id,
-                album: 'Album ' + id
-            };
+        var updateInterval = setInterval(function () {
 
-            rows.push(row);
+            if (_app.state.rows.length < _app.state.maxRows) {
+                //User 'scrolled' to bottom
 
-            console.log("ExampleApplication.componentDidMount() - interval - new row: ", row);
+                // simulate updating model with server results, after a scroll
+                for (var i = 0; i < _app.state.pageSize; i++) {
+                    var last = rows[rows.length - 1];
+                    var id = last.id + 1;
+                    var row = {
+                        id: id,
+                        rowNum: id,
+                        artist: 'Artist ' + id,
+                        album: 'Album ' + id
+                    };
 
-            _app.setState({rows: rows});
+                    rows.push(row);
+                }
 
-        }, 1000);
+                _app.state.rows = rows;
+                _app.setState(_app.state);
+
+                scrollToBottom();
+
+            } else {
+                console.log("ExampleApplication.interval() - DONE at rows: ", _app.state.maxRows);
+                clearInterval(updateInterval);
+            }
+
+        }, this.state.updateInterval);
     },
 
     render: function () {
-        //var elapsed = Math.round(this.props.elapsed  / 100);
-        //var seconds = elapsed / 10 + (elapsed % 10 ? '' : '.0' );
-        //var message =
-        //  'React has been successfully running for ' + seconds + ' seconds.';
-
-        console.log("ExampleApplication.render() - state: ", this.state);
+        console.log("ExampleApplication.render() - state.rows.length: ", this.state.rows.length);
 
         return <InfiniteTable rows={this.state.rows}/>;
     }
@@ -92,7 +120,7 @@ var InfiniteTable = React.createClass({
             <tbody id="item_table_body">
             {
                 this.props.rows.map(function (result) {
-                    console.log("InfiniteTable.render() - props.rows.map(", result, ")");
+                    //console.log("InfiniteTable.render() - props.rows.map(", result, ")");
                     return <TableRow key={result.id} data={result}/>;
                 })
             }
