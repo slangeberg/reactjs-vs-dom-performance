@@ -1,6 +1,16 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
+var executionTimes = [],
+    startTime = performance.now(),
+
+//Explicitly copying, as I'm skeptical, when the #'s never change
+initMemory = {
+    jsHeapSizeLimit: performance.memory.jsHeapSizeLimit,
+    totalJSHeapSize: performance.memory.totalJSHeapSize,
+    usedJSHeapSize: performance.memory.usedJSHeapSize
+};
+
 //Read url params for: maxRows
 var getMaxRows = function getMaxRows() {
     var result = 500;
@@ -21,17 +31,43 @@ var getMaxRows = function getMaxRows() {
 };
 
 module.exports = {
+
     maxRows: getMaxRows(),
 
+    addExecutionTime: function addExecutionTime(time) {
+        executionTimes.push(time);
+    },
+
     median: function median(sequence) {
+        //copy
+        sequence = sequence.slice();
         // note that direction doesn't matter
-        sequence.sort(function (a, b) {
-            return a - b;
-        });
+        sequence.sort(this.sortAscending);
         if (sequence.length >= 3) {
             return sequence[Math.ceil(sequence.length / 2)];
         }
         return sequence[0];
+    },
+
+    printSummary: function printSummary() {
+
+        executionTimes.sort(this.sortAscending);
+
+        var medianValue = this.median(executionTimes).toFixed(4);
+        var finalTime = performance.now();
+        var totalTime = (finalTime - startTime).toFixed(4);
+
+        var printMemory = function printMemory(target) {
+            return target.jsHeapSizeLimit + ', totalJSHeapSize: ' + target.totalJSHeapSize + ', usedJSHeapSize: ' + target.usedJSHeapSize;
+        };
+
+        var stats = ["------------------------------", "Execution completed with parameters: ", "maxRows: " + this.maxRows, "------------------------------", 'Execution times: ' + executionTimes, 'Median time: ' + medianValue + 'ms', 'Total time: ' + totalTime + 'ms, ' + (totalTime / 1000).toFixed(2) + 's', "------------------------------", 'Initial memory: ' + printMemory(initMemory), 'Final memory: jsHeapSizeLimit: ' + printMemory(performance.memory)];
+
+        var div = document.createElement('div');
+        div.innerHTML = stats.join('<br/>');
+        document.body.appendChild(div);
+
+        this.scrollToBottom();
     },
 
     scrollToBottom: function scrollToBottom() {
@@ -41,6 +77,10 @@ module.exports = {
         //console.log("scrollToBottom() - scroll to docHeight: ", docHeight);
 
         window.scrollTo(0, docHeight);
+    },
+
+    sortAscending: function sortAscending(a, b) {
+        return a - b;
     }
 };
 
@@ -56,13 +96,7 @@ var lib = require('./common.js');
 console.log("lib: ", lib.getMaxRows);
 
 //ensure copy
-var initMemory = {
-    jsHeapSizeLimit: performance.memory.jsHeapSizeLimit,
-    totalJSHeapSize: performance.memory.totalJSHeapSize,
-    usedJSHeapSize: performance.memory.usedJSHeapSize
-},
-    executionTimes = [],
-    startTime = performance.now(),
+var startTime = performance.now(),
     pageSize = 50,
     updateInterval = 750;
 
@@ -83,7 +117,6 @@ var ExampleApplication = React.createClass({
     componentDidMount: function componentDidMount() {
 
         console.log("ExampleApplication.componentDidMount() - will render with initial state: ", this.state);
-        console.log("ExampleApplication.componentDidMount() - initial performance.memory: ", initMemory);
 
         var _app = this;
 
@@ -114,27 +147,11 @@ var ExampleApplication = React.createClass({
                 lib.scrollToBottom();
 
                 var t1 = performance.now();
-                executionTimes.push(t1 - t0);
+                lib.addExecutionTime(t1 - t0);
             } else {
                 clearInterval(updateInterval);
 
-                console.log("ExampleApplication.interval() - DONE at rows: ", lib.maxRows);
-
-                console.log("ExampleApplication.interval() - initial performance.memory: ", initMemory);
-                console.log("ExampleApplication.interval() - performance.memory: ", performance.memory);
-
-                // SIDE EFFECT: Sorts array
-                var medianValue = lib.median(executionTimes).toFixed(4);
-                var finalTime = performance.now();
-                var totalTime = (finalTime - startTime).toFixed(4);
-
-                var stats = ["------------------------------", "Execution completed with parameters: ", "maxRows: " + lib.maxRows, "------------------------------", 'Execution times: ' + executionTimes, 'Median time: ' + medianValue + 'ms', 'Total time: ' + totalTime + 'ms, ' + (totalTime / 1000).toFixed(2) + 's'];
-
-                var div = document.createElement('div');
-                div.innerHTML = stats.join('<br/>');
-                document.body.appendChild(div);
-
-                lib.scrollToBottom();
+                lib.printSummary();
             }
         }, this.state.updateInterval);
     },

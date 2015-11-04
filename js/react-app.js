@@ -9,13 +9,7 @@ var lib = require('./common.js');
 console.log("lib: ", lib.getMaxRows);
 
 //ensure copy
-var initMemory = {
-        jsHeapSizeLimit: performance.memory.jsHeapSizeLimit,
-        totalJSHeapSize: performance.memory.totalJSHeapSize,
-        usedJSHeapSize: performance.memory.usedJSHeapSize
-    },
-    executionTimes = [],
-    startTime = performance.now(),
+var startTime = performance.now(),
     pageSize = 50,
     updateInterval = 750;
 
@@ -35,7 +29,6 @@ var ExampleApplication = React.createClass({
     componentDidMount: function() {
 
         console.log("ExampleApplication.componentDidMount() - will render with initial state: ", this.state);
-        console.log("ExampleApplication.componentDidMount() - initial performance.memory: ", initMemory);
 
         var _app = this;
 
@@ -66,36 +59,12 @@ var ExampleApplication = React.createClass({
                 lib.scrollToBottom();
 
                 var t1 = performance.now();
-                executionTimes.push(t1 - t0);
+                lib.addExecutionTime(t1 - t0);
 
             } else {
                 clearInterval(updateInterval);
 
-                console.log("ExampleApplication.interval() - DONE at rows: ", lib.maxRows);
-
-                console.log("ExampleApplication.interval() - initial performance.memory: ", initMemory);
-                console.log("ExampleApplication.interval() - performance.memory: ", performance.memory);
-
-                // SIDE EFFECT: Sorts array
-                var medianValue = lib.median(executionTimes).toFixed(4);
-                var finalTime = performance.now();
-                var totalTime = (finalTime - startTime).toFixed(4);
-
-                var stats = [
-                    "------------------------------",
-                    "Execution completed with parameters: ",
-                    "maxRows: " + lib.maxRows,
-                    "------------------------------",
-                    'Execution times: ' + executionTimes,
-                    'Median time: ' + medianValue + 'ms',
-                    'Total time: ' + totalTime + 'ms, ' + (totalTime/1000).toFixed(2) + 's'
-                ];
-
-                var div = document.createElement('div');
-                div.innerHTML = stats.join('<br/>');
-                document.body.appendChild(div);
-
-                lib.scrollToBottom();
+                lib.printSummary();
             }
 
         }, this.state.updateInterval);
