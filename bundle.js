@@ -14,6 +14,11 @@ var initMemory = {
 };
 
 var executionTimes = [];
+var startTime = performance.now();
+
+console.log("startTime: ", startTime);
+
+//////////////
 
 var median = function median(sequence) {
     // note that direction doesn't matter
@@ -32,6 +37,26 @@ var scrollToBottom = function scrollToBottom() {
     window.scrollTo(0, docHeight);
 };
 
+//Read url params for: maxRows
+var getMaxRows = function getMaxRows() {
+
+    var result = 1000;
+    var loc = location.search.slice(1);
+    if (loc) {
+        var params = {};
+        var tokens = loc.split('&');
+        tokens.forEach(function (token) {
+            var bits = token.split('=');
+            params[bits[0]] = bits[1];
+        });
+        if (params['maxRows']) {
+            result = parseInt(params['maxRows'], 10);
+        }
+    }
+    console.log("getMaxRows(): ", result);
+    return result;
+};
+
 var ExampleApplication = React.createClass({
     displayName: 'ExampleApplication',
 
@@ -41,7 +66,7 @@ var ExampleApplication = React.createClass({
             pageSize: 50,
             rows: [],
             updateInterval: 750,
-            maxRows: 10000
+            maxRows: getMaxRows()
         };
     },
 
@@ -93,9 +118,12 @@ var ExampleApplication = React.createClass({
 
                 // SIDE EFFECT: Sorts array
                 var medianValue = median(executionTimes).toFixed(4);
+                var finalTime = performance.now();
+                var totalTime = (finalTime - startTime).toFixed(4);
 
                 console.log('Execution times: ', executionTimes);
                 console.log('Median time: ', medianValue, 'ms');
+                console.log('Total time: ', totalTime, 'ms, ', (totalTime / 1000).toFixed(2), 's');
             }
         }, this.state.updateInterval);
     },
