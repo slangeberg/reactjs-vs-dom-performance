@@ -6,15 +6,37 @@ console.log("react-app.js()");
 var React = require('react');
 var ReactDOM = require('react-dom');
 
+//Read url params for: maxRows
+var getMaxRows = function getMaxRows() {
+    var result = 1000;
+    var loc = location.search.slice(1);
+    if (loc) {
+        var params = {};
+        var tokens = loc.split('&');
+        tokens.forEach(function (token) {
+            var bits = token.split('=');
+            params[bits[0].toLowerCase()] = bits[1];
+        });
+        if (params['maxRows'.toLowerCase()]) {
+            result = parseInt(params['maxRows'.toLowerCase()], 10);
+        }
+    }
+    console.log("getMaxRows(): ", result);
+    return result;
+};
+
 //ensure copy
 var initMemory = {
     jsHeapSizeLimit: performance.memory.jsHeapSizeLimit,
     totalJSHeapSize: performance.memory.totalJSHeapSize,
     usedJSHeapSize: performance.memory.usedJSHeapSize
-};
-
-var executionTimes = [];
-var startTime = performance.now();
+},
+    executionTimes = [],
+    startTime = performance.now(),
+    maxRows = getMaxRows(),
+    pageSize = 50,
+    updateInterval = 750,
+    maxRows = maxRows;
 
 console.log("startTime: ", startTime);
 
@@ -37,36 +59,13 @@ var scrollToBottom = function scrollToBottom() {
     window.scrollTo(0, docHeight);
 };
 
-//Read url params for: maxRows
-var getMaxRows = function getMaxRows() {
-
-    var result = 1000;
-    var loc = location.search.slice(1);
-    if (loc) {
-        var params = {};
-        var tokens = loc.split('&');
-        tokens.forEach(function (token) {
-            var bits = token.split('=');
-            params[bits[0]] = bits[1];
-        });
-        if (params['maxRows']) {
-            result = parseInt(params['maxRows'], 10);
-        }
-    }
-    console.log("getMaxRows(): ", result);
-    return result;
-};
-
 var ExampleApplication = React.createClass({
     displayName: 'ExampleApplication',
 
     getInitialState: function getInitialState() {
         console.log("ExampleApplication.getInitialState()");
         return {
-            pageSize: 50,
-            rows: [],
-            updateInterval: 750,
-            maxRows: getMaxRows()
+            rows: []
         };
     },
 
@@ -78,17 +77,13 @@ var ExampleApplication = React.createClass({
         var _app = this;
 
         var updateInterval = setInterval(function () {
-
-            if (_app.state.rows.length < _app.state.maxRows) {
+            var rows = _app.state.rows;
+            if (rows.length < maxRows) {
 
                 //Simulate that user 'scrolled' to bottom
 
-                var t0 = performance.now();
-
-                var rows = _app.state.rows;
-
                 // simulate updating model with server results, after a scroll
-                for (var i = 0; i < _app.state.pageSize; i++) {
+                for (var i = 0; i < pageSize; i++) {
                     var last = rows[rows.length - 1];
                     var id = (last ? last.id : 0) + 1;
                     var row = {
@@ -101,7 +96,8 @@ var ExampleApplication = React.createClass({
                     rows.push(row);
                 }
 
-                _app.state.rows = rows;
+                var t0 = performance.now();
+
                 _app.setState(_app.state);
 
                 scrollToBottom();
@@ -111,7 +107,7 @@ var ExampleApplication = React.createClass({
             } else {
                 clearInterval(updateInterval);
 
-                console.log("ExampleApplication.interval() - DONE at rows: ", _app.state.maxRows);
+                console.log("ExampleApplication.interval() - DONE at rows: ", maxRows);
 
                 console.log("ExampleApplication.interval() - initial performance.memory: ", initMemory);
                 console.log("ExampleApplication.interval() - performance.memory: ", performance.memory);
@@ -121,6 +117,9 @@ var ExampleApplication = React.createClass({
                 var finalTime = performance.now();
                 var totalTime = (finalTime - startTime).toFixed(4);
 
+                console.log("Execution completed with parameters: ");
+                console.log("maxRows: ", maxRows);
+                console.log("------------------------------");
                 console.log('Execution times: ', executionTimes);
                 console.log('Median time: ', medianValue, 'ms');
                 console.log('Total time: ', totalTime, 'ms, ', (totalTime / 1000).toFixed(2), 's');
