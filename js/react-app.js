@@ -20,15 +20,12 @@ console.log("startTime: ", startTime);
 var ExampleApplication = React.createClass({
 
     getInitialState: function() {
-        console.log("ExampleApplication.getInitialState()");
         return {
             rows: []
         };
     },
 
     componentDidMount: function() {
-
-        console.log("ExampleApplication.componentDidMount() - will render with initial state: ", this.state);
 
         var _app = this;
 
@@ -71,8 +68,6 @@ var ExampleApplication = React.createClass({
     },
 
     render: function () {
-        console.log("ExampleApplication.render() - state.rows.length: ", this.state.rows.length);
-
         return <InfiniteTable rows={this.state.rows}/>;
     }
 });

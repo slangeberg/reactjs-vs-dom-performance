@@ -37,6 +37,13 @@ module.exports = {
         executionTimes.push(time);
     },
 
+    mean: function(sequence) {
+        var sum = 0;
+        sequence.forEach(function(val){
+            sum += val;
+        });
+        return sum / sequence.length;
+    },
     median: function(sequence) {
         //copy
         sequence = sequence.slice();
@@ -52,12 +59,13 @@ module.exports = {
 
         executionTimes.sort(this.sortAscending)
 
+        var meanValue = this.mean(executionTimes).toFixed(4);
         var medianValue = this.median(executionTimes).toFixed(4);
         var finalTime = performance.now();
         var totalTime = (finalTime - startTime).toFixed(4);
 
         var printMemory = function(target) {
-            return target.jsHeapSizeLimit + ', totalJSHeapSize: ' + target.totalJSHeapSize + ', usedJSHeapSize: ' + target.usedJSHeapSize
+            return 'jsHeapSizeLimit: ' + target.jsHeapSizeLimit + ', totalJSHeapSize: ' + target.totalJSHeapSize + ', usedJSHeapSize: ' + target.usedJSHeapSize;
         };
 
         var stats = [
@@ -66,11 +74,12 @@ module.exports = {
             "maxRows: " + this.maxRows,
             "------------------------------",
             'Execution times: ' + executionTimes,
+            'Avg. time: ' + meanValue + 'ms',
             'Median time: ' + medianValue + 'ms',
             'Total time: ' + totalTime + 'ms, ' + (totalTime/1000).toFixed(2) + 's',
             "------------------------------",
             'Initial memory: ' + printMemory(initMemory),
-            'Final memory: jsHeapSizeLimit: ' + printMemory(performance.memory)
+            'Final memory: ' + printMemory(performance.memory)
         ];
 
         var div = document.createElement('div');

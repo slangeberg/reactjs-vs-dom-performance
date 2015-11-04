@@ -38,6 +38,13 @@ module.exports = {
         executionTimes.push(time);
     },
 
+    mean: function mean(sequence) {
+        var sum = 0;
+        sequence.forEach(function (val) {
+            sum += val;
+        });
+        return sum / sequence.length;
+    },
     median: function median(sequence) {
         //copy
         sequence = sequence.slice();
@@ -53,15 +60,16 @@ module.exports = {
 
         executionTimes.sort(this.sortAscending);
 
+        var meanValue = this.mean(executionTimes).toFixed(4);
         var medianValue = this.median(executionTimes).toFixed(4);
         var finalTime = performance.now();
         var totalTime = (finalTime - startTime).toFixed(4);
 
         var printMemory = function printMemory(target) {
-            return target.jsHeapSizeLimit + ', totalJSHeapSize: ' + target.totalJSHeapSize + ', usedJSHeapSize: ' + target.usedJSHeapSize;
+            return 'jsHeapSizeLimit: ' + target.jsHeapSizeLimit + ', totalJSHeapSize: ' + target.totalJSHeapSize + ', usedJSHeapSize: ' + target.usedJSHeapSize;
         };
 
-        var stats = ["------------------------------", "Execution completed with parameters: ", "maxRows: " + this.maxRows, "------------------------------", 'Execution times: ' + executionTimes, 'Median time: ' + medianValue + 'ms', 'Total time: ' + totalTime + 'ms, ' + (totalTime / 1000).toFixed(2) + 's', "------------------------------", 'Initial memory: ' + printMemory(initMemory), 'Final memory: jsHeapSizeLimit: ' + printMemory(performance.memory)];
+        var stats = ["------------------------------", "Execution completed with parameters: ", "maxRows: " + this.maxRows, "------------------------------", 'Execution times: ' + executionTimes, 'Avg. time: ' + meanValue + 'ms', 'Median time: ' + medianValue + 'ms', 'Total time: ' + totalTime + 'ms, ' + (totalTime / 1000).toFixed(2) + 's', "------------------------------", 'Initial memory: ' + printMemory(initMemory), 'Final memory: ' + printMemory(performance.memory)];
 
         var div = document.createElement('div');
         div.innerHTML = stats.join('<br/>');
@@ -108,15 +116,12 @@ var ExampleApplication = React.createClass({
     displayName: 'ExampleApplication',
 
     getInitialState: function getInitialState() {
-        console.log("ExampleApplication.getInitialState()");
         return {
             rows: []
         };
     },
 
     componentDidMount: function componentDidMount() {
-
-        console.log("ExampleApplication.componentDidMount() - will render with initial state: ", this.state);
 
         var _app = this;
 
@@ -157,8 +162,6 @@ var ExampleApplication = React.createClass({
     },
 
     render: function render() {
-        console.log("ExampleApplication.render() - state.rows.length: ", this.state.rows.length);
-
         return React.createElement(InfiniteTable, { rows: this.state.rows });
     }
 });
