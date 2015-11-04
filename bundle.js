@@ -128,12 +128,13 @@ var ExampleApplication = React.createClass({
                 var finalTime = performance.now();
                 var totalTime = (finalTime - startTime).toFixed(4);
 
-                console.log("Execution completed with parameters: ");
-                console.log("maxRows: ", lib.maxRows);
-                console.log("------------------------------");
-                console.log('Execution times: ', executionTimes);
-                console.log('Median time: ', medianValue, 'ms');
-                console.log('Total time: ', totalTime, 'ms, ', (totalTime / 1000).toFixed(2), 's');
+                var stats = ["------------------------------", "Execution completed with parameters: ", "maxRows: " + lib.maxRows, "------------------------------", 'Execution times: ' + executionTimes, 'Median time: ' + medianValue + 'ms', 'Total time: ' + totalTime + 'ms, ' + (totalTime / 1000).toFixed(2) + 's'];
+
+                var div = document.createElement('div');
+                div.innerHTML = stats.join('<br/>');
+                document.body.appendChild(div);
+
+                lib.scrollToBottom();
             }
         }, this.state.updateInterval);
     },
