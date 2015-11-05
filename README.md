@@ -12,4 +12,4 @@ and:
 <pre><code>$ npm run start-react</code></pre>
 
 <p>If you'd like to run from a web server, and have Python installed, you can run:</p>
-<pre><code>python -m SimpleHTTPServer 8888</code></pre>
+<pre><code>$ python -m SimpleHTTPServer 8888</code></pre>
