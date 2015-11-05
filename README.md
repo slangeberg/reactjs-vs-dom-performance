@@ -7,9 +7,9 @@
 <pre><code>$ npm install browserify babelify react react-dom watchify --save</code></pre>
    
 <p>React.js app is written with JSX in a CommonJS module and precompiled to vanilla JS by running:</p>
-<pre><code>$npm run start-dom</code></pre>
+<pre><code>$ npm run start-dom</code></pre>
 and:
-<pre><code>$npm run start-react</code></pre>
+<pre><code>$ npm run start-react</code></pre>
 
 <p>If you'd like to run from a web server, and have Python installed, you can run:</p>
 <pre><code>python -m SimpleHTTPServer 8888</code></pre>
