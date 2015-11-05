@@ -1,22 +1,24 @@
+(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
 var executionTimes = [],
     startTime = null,
-    //Explicitly copying, as I'm skeptical, when the #'s never change
-    initMemory = {
-        jsHeapSizeLimit: performance.memory.jsHeapSizeLimit,
-        totalJSHeapSize: performance.memory.totalJSHeapSize,
-        usedJSHeapSize: performance.memory.usedJSHeapSize
-    };
+
+//Explicitly copying, as I'm skeptical, when the #'s never change
+initMemory = {
+    jsHeapSizeLimit: performance.memory.jsHeapSizeLimit,
+    totalJSHeapSize: performance.memory.totalJSHeapSize,
+    usedJSHeapSize: performance.memory.usedJSHeapSize
+};
 
 //Read url params for: maxRows
-var getMaxRows = function() {
+var getMaxRows = function getMaxRows() {
     var result = 500;
     var loc = location.search.slice(1);
     if (loc) {
         var params = {};
         var tokens = loc.split('&');
-        tokens.forEach(function(token) {
+        tokens.forEach(function (token) {
             var bits = token.split('=');
             params[bits[0].toLowerCase()] = bits[1];
         });
@@ -26,7 +28,7 @@ var getMaxRows = function() {
     }
     console.log("getMaxRows(): ", result);
     return result;
-}
+};
 
 //////////////
 
@@ -37,7 +39,7 @@ module.exports = {
     updateEvery: 750,
     rows: [],
 
-    runApp: function(worker) {
+    runApp: function runApp(worker) {
 
         if (!startTime) {
             startTime = performance.now();
@@ -65,21 +67,19 @@ module.exports = {
                 _lib.scrollToBottom();
 
                 _lib.addExecutionTime(t1 - t0);
-
             } else {
                 clearInterval(updateInterval);
 
                 _lib.printSummary();
             }
-
         }, _lib.updateEvery);
     },
 
-    addExecutionTime: function (time) {
+    addExecutionTime: function addExecutionTime(time) {
         executionTimes.push(time);
     },
 
-    getNextPageSet: function () {
+    getNextPageSet: function getNextPageSet() {
 
         var pageSet = [];
         var last = this.rows[this.rows.length - 1];
@@ -101,15 +101,15 @@ module.exports = {
         return pageSet;
     },
 
-    mean: function(sequence) {
+    mean: function mean(sequence) {
         var sum = 0;
-        sequence.forEach(function(val){
+        sequence.forEach(function (val) {
             sum += val;
         });
         return sum / sequence.length;
     },
 
-    median: function(sequence) {
+    median: function median(sequence) {
         //copy
         sequence = sequence.slice();
         // note that direction doesn't matter
@@ -120,34 +120,20 @@ module.exports = {
         return sequence[0];
     },
 
-    printSummary: function () {
+    printSummary: function printSummary() {
 
-        executionTimes.sort(this.sortAscending)
+        executionTimes.sort(this.sortAscending);
 
         var meanValue = this.mean(executionTimes).toFixed(4);
         var medianValue = this.median(executionTimes).toFixed(4);
         var finalTime = performance.now();
         var totalTime = (finalTime - startTime).toFixed(4);
 
-        var printMemory = function(target) {
-            return 'jsHeapSizeLimit: ' + target.jsHeapSizeLimit
-                + ', totalJSHeapSize: ' + target.totalJSHeapSize
-                + ', usedJSHeapSize: ' + target.usedJSHeapSize;
+        var printMemory = function printMemory(target) {
+            return 'jsHeapSizeLimit: ' + target.jsHeapSizeLimit + ', totalJSHeapSize: ' + target.totalJSHeapSize + ', usedJSHeapSize: ' + target.usedJSHeapSize;
         };
 
-        var stats = [
-            "------------------------------",
-            "Execution completed with parameters: ",
-            "maxRows: " + this.maxRows,
-            "------------------------------",
-            'Execution times: ' + executionTimes,
-            'Avg. time: ' + meanValue + 'ms',
-            'Median time: ' + medianValue + 'ms',
-            'Total time: ' + totalTime + 'ms, ' + (totalTime/1000).toFixed(2) + 's',
-            "------------------------------",
-            'Initial memory: ' + printMemory(initMemory),
-            'Final memory: ' + printMemory(performance.memory)
-        ];
+        var stats = ["------------------------------", "Execution completed with parameters: ", "maxRows: " + this.maxRows, "------------------------------", 'Execution times: ' + executionTimes, 'Avg. time: ' + meanValue + 'ms', 'Median time: ' + medianValue + 'ms', 'Total time: ' + totalTime + 'ms, ' + (totalTime / 1000).toFixed(2) + 's', "------------------------------", 'Initial memory: ' + printMemory(initMemory), 'Final memory: ' + printMemory(performance.memory)];
 
         var div = document.createElement('div');
         div.innerHTML = stats.join('<br/>');
@@ -156,7 +142,7 @@ module.exports = {
         this.scrollToBottom();
     },
 
-    scrollToBottom: function() {
+    scrollToBottom: function scrollToBottom() {
         var docHeight = document.body.offsetHeight;
         docHeight = docHeight == undefined ? window.document.documentElement.scrollHeight : docHeight;
 
@@ -165,7 +151,33 @@ module.exports = {
         window.scrollTo(0, docHeight);
     },
 
-    sortAscending: function (a, b) {
+    sortAscending: function sortAscending(a, b) {
         return a - b;
     }
 };
+
+},{}],2:[function(require,module,exports){
+'use strict';
+
+var lib = require('./common.js');
+
+//////
+
+var table = document.getElementById('item_table_body');
+
+var rows = [];
+
+lib.runApp(function (pageSet, allRows) {
+    // simulate updating model with server results, after a scroll
+    pageSet.forEach(function (row) {
+        writeRow(row);
+    });
+});
+
+function writeRow(row) {
+    var tr = document.createElement('tr');
+    tr.innerHTML = "<td>" + row.rowNum + "</td>" + "<td>&nbsp;</td>" + "<td>" + row.artist + "</td>" + "<td>" + row.album + "</td>";
+    table.appendChild(tr);
+}
+
+},{"./common.js":1}]},{},[2]);

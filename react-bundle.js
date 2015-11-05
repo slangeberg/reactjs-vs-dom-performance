@@ -2,7 +2,7 @@
 'use strict';
 
 var executionTimes = [],
-    startTime = performance.now(),
+    startTime = null,
 
 //Explicitly copying, as I'm skeptical, when the #'s never change
 initMemory = {
@@ -30,12 +30,75 @@ var getMaxRows = function getMaxRows() {
     return result;
 };
 
+//////////////
+
 module.exports = {
 
     maxRows: getMaxRows(),
+    pageSize: 50,
+    updateEvery: 750,
+    rows: [],
+
+    runApp: function runApp(worker) {
+
+        if (!startTime) {
+            startTime = performance.now();
+        }
+
+        var _lib = this;
+
+        var updateInterval = setInterval(function () {
+
+            if (_lib.rows.length < _lib.maxRows) {
+
+                //Simulate that user 'scrolled' to bottom
+
+                // simulate updating model with server results, after a scroll
+
+                var pageSet = _lib.getNextPageSet();
+                _lib.rows = _lib.rows.concat(pageSet);
+
+                var t0 = performance.now();
+
+                worker(pageSet, _lib.rows);
+
+                var t1 = performance.now();
+
+                _lib.scrollToBottom();
+
+                _lib.addExecutionTime(t1 - t0);
+            } else {
+                clearInterval(updateInterval);
+
+                _lib.printSummary();
+            }
+        }, _lib.updateEvery);
+    },
 
     addExecutionTime: function addExecutionTime(time) {
         executionTimes.push(time);
+    },
+
+    getNextPageSet: function getNextPageSet() {
+
+        var pageSet = [];
+        var last = this.rows[this.rows.length - 1];
+
+        for (var i = 0; i < this.pageSize; i++) {
+            var id = (last ? last.id : 0) + 1;
+            var row = {
+                id: id,
+                rowNum: id,
+                artist: 'Artist ' + id,
+                album: 'Album ' + id
+            };
+
+            last = row;
+
+            pageSet.push(row);
+        }
+
+        return pageSet;
     },
 
     mean: function mean(sequence) {
@@ -45,6 +108,7 @@ module.exports = {
         });
         return sum / sequence.length;
     },
+
     median: function median(sequence) {
         //copy
         sequence = sequence.slice();
@@ -95,20 +159,12 @@ module.exports = {
 },{}],2:[function(require,module,exports){
 'use strict';
 
-console.log("react-app.js()");
-
 var React = require('react');
 var ReactDOM = require('react-dom');
+
+//////////////
+
 var lib = require('./common.js');
-
-console.log("lib: ", lib.getMaxRows);
-
-//ensure copy
-var startTime = performance.now(),
-    pageSize = 50,
-    updateInterval = 750;
-
-console.log("startTime: ", startTime);
 
 //////////////
 
@@ -125,40 +181,11 @@ var ExampleApplication = React.createClass({
 
         var _app = this;
 
-        var updateInterval = setInterval(function () {
-            var rows = _app.state.rows;
-            if (rows.length < lib.maxRows) {
-
-                //Simulate that user 'scrolled' to bottom
-
-                // simulate updating model with server results, after a scroll
-                for (var i = 0; i < pageSize; i++) {
-                    var last = rows[rows.length - 1];
-                    var id = (last ? last.id : 0) + 1;
-                    var row = {
-                        id: id,
-                        rowNum: id,
-                        artist: 'Artist ' + id,
-                        album: 'Album ' + id
-                    };
-
-                    rows.push(row);
-                }
-
-                var t0 = performance.now();
-
-                _app.setState(_app.state);
-
-                lib.scrollToBottom();
-
-                var t1 = performance.now();
-                lib.addExecutionTime(t1 - t0);
-            } else {
-                clearInterval(updateInterval);
-
-                lib.printSummary();
-            }
-        }, this.state.updateInterval);
+        lib.runApp(function (pageSet, allRows) {
+            // simulate updating model with server results, after a scroll
+            _app.state.rows = allRows;
+            _app.setState(_app.state);
+        });
     },
 
     render: function render() {
@@ -166,42 +193,10 @@ var ExampleApplication = React.createClass({
     }
 });
 
-var TableRow = React.createClass({
-    displayName: 'TableRow',
-
-    render: function render() {
-        return React.createElement(
-            'tr',
-            null,
-            React.createElement(
-                'td',
-                null,
-                this.props.data.rowNum
-            ),
-            React.createElement(
-                'td',
-                null,
-                ' '
-            ),
-            React.createElement(
-                'td',
-                null,
-                this.props.data.artist
-            ),
-            React.createElement(
-                'td',
-                null,
-                this.props.data.album
-            )
-        );
-    }
-});
-
 var InfiniteTable = React.createClass({
     displayName: 'InfiniteTable',
 
     render: function render() {
-
         return React.createElement(
             'table',
             { className: 'table' },
@@ -244,6 +239,37 @@ var InfiniteTable = React.createClass({
                 this.props.rows.map(function (result) {
                     return React.createElement(TableRow, { key: result.id, data: result });
                 })
+            )
+        );
+    }
+});
+
+var TableRow = React.createClass({
+    displayName: 'TableRow',
+
+    render: function render() {
+        return React.createElement(
+            'tr',
+            null,
+            React.createElement(
+                'td',
+                null,
+                this.props.data.rowNum
+            ),
+            React.createElement(
+                'td',
+                null,
+                ' '
+            ),
+            React.createElement(
+                'td',
+                null,
+                this.props.data.artist
+            ),
+            React.createElement(
+                'td',
+                null,
+                this.props.data.album
             )
         );
     }
