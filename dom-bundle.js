@@ -39,7 +39,7 @@ module.exports = {
     updateEvery: 750,
     rows: [],
 
-    runApp: function runApp(worker) {
+    runApp: function runApp(renderNext) {
 
         if (!startTime) {
             startTime = performance.now();
@@ -52,6 +52,7 @@ module.exports = {
             if (_lib.rows.length < _lib.maxRows) {
 
                 //Simulate that user 'scrolled' to bottom
+                _lib.scrollToBottom();
 
                 // simulate updating model with server results, after a scroll
 
@@ -60,11 +61,9 @@ module.exports = {
 
                 var t0 = performance.now();
 
-                worker(pageSet, _lib.rows);
+                renderNext(pageSet, _lib.rows);
 
                 var t1 = performance.now();
-
-                _lib.scrollToBottom();
 
                 _lib.addExecutionTime(t1 - t0);
             } else {
@@ -129,11 +128,7 @@ module.exports = {
         var finalTime = performance.now();
         var totalTime = (finalTime - startTime).toFixed(4);
 
-        var printMemory = function printMemory(target) {
-            return 'jsHeapSizeLimit: ' + target.jsHeapSizeLimit + ', totalJSHeapSize: ' + target.totalJSHeapSize + ', usedJSHeapSize: ' + target.usedJSHeapSize;
-        };
-
-        var stats = ["------------------------------", "Execution completed with parameters: ", "maxRows: " + this.maxRows, "------------------------------", 'Execution times: ' + executionTimes, 'Avg. time: ' + meanValue + 'ms', 'Median time: ' + medianValue + 'ms', 'Total time: ' + totalTime + 'ms, ' + (totalTime / 1000).toFixed(2) + 's', "------------------------------", 'Initial memory: ' + printMemory(initMemory), 'Final memory: ' + printMemory(performance.memory)];
+        var stats = ["------------------------------", "Execution completed with parameters: ", "maxRows: " + this.maxRows, "------------------------------", 'Execution times: ' + executionTimes, 'Avg. time: ' + meanValue + 'ms', 'Median time: ' + medianValue + 'ms', 'Total time: ' + totalTime + 'ms, ' + (totalTime / 1000).toFixed(2) + 's'];
 
         var div = document.createElement('div');
         div.innerHTML = stats.join('<br/>');

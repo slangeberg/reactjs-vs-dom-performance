@@ -61,6 +61,11 @@ p, ul {
   margin: 15px 0;
 }
 
+td {
+  border-top: .1em solid grey;
+  width: 18%;
+}
+
 ul {
   padding-left: 30px;
 }
