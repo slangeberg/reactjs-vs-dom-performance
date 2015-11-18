@@ -3,9 +3,8 @@
   These demo apps generate results for article at <a href="https://objectpartners.com/2015/11/03/comparing-react-js-performance-vs-native-dom">Comparing React.js performance vs. native DOM</a>
 </p>
 
-<p>At the time of this writing I leveraged the following tools, on a Macbook Pro, running with 2Ghz i7, 16GB RAM:
+<p>Tested with:
 <ul>
-	<li>OSX 10.11, El Capitan</li>
 	<li>node: v5.0.0</li>
 	<li>npm: 3.3.9</li>
 	<li>Chrome 46.0.x</li>
