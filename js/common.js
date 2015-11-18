@@ -1,16 +1,22 @@
 'use strict';
 
 var executionTimes = [],
-    startTime = null,
-    //Explicitly copying, as I'm skeptical, when the #'s never change
-    initMemory = {
-        jsHeapSizeLimit: performance.memory.jsHeapSizeLimit,
-        totalJSHeapSize: performance.memory.totalJSHeapSize,
-        usedJSHeapSize: performance.memory.usedJSHeapSize
-    };
+    startTime = null;
+
+//init objects for IE
+if (!performance.now) {
+    performance.now = function() {
+        return new Date().getTime()
+    }
+}
+if (!window.console) {
+    window.console = {
+        log: function() {}
+    }
+}
 
 //Read url params for: maxRows
-var getMaxRows = function() {
+function getMaxRows() {
     var result = 500;
     var loc = location.search.slice(1);
     if (loc) {
@@ -149,8 +155,6 @@ module.exports = {
     scrollToBottom: function() {
         var docHeight = document.body.offsetHeight;
         docHeight = docHeight == undefined ? window.document.documentElement.scrollHeight : docHeight;
-
-        //console.log("scrollToBottom() - scroll to docHeight: ", docHeight);
 
         window.scrollTo(0, docHeight);
     },
