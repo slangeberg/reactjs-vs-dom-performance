@@ -1,6 +1,6 @@
 #React JS vs DOM JS Throwdown
 <p>
-  These demo apps generate results for article at <a href="https://objectpartners.com/2015/11/19/comparing-react-js-performance-vs-native-dom">Comparing React.js performance vs. native DOM</a>
+  These demo apps generate results for article at <a href="https://objectpartners.com/?p=13315" target="_blank" alt="https://objectpartners.com/2015/11/19/comparing-react-js-performance-vs-native-dom">Comparing React.js performance vs. native DOM</a>
 </p>
 
 <p>Tested with:
